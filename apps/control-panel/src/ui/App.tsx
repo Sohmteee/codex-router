@@ -177,8 +177,8 @@ function Overview({ ready, serviceUp, loading, onRefresh, onSettings, onModels, 
     </div>
 
     <section className={`status-banner${ready ? " status-banner-ready" : ""}`} aria-labelledby="status-title">
-      <div className="status-signal" aria-hidden="true"><span /><span /><span /><i>{ready ? <Check size={19} /> : <Radio size={19} />}</i></div>
-      <div className="status-copy"><div className="section-kicker">ROUTING STATUS <span>·</span> {ready ? "ALL CHECKS PASSED" : "FAIL-CLOSED"}</div><h2 id="status-title">{ready ? "Ready for a verified route" : "Inference forwarding is off"}</h2><p>{ready ? "The integration checks passed. Review model eligibility before connecting Codex Desktop." : "Codex requests are not being forwarded. The compatibility gate must pass before this service can route inference."}</p></div>
+      <div className="status-copy"><div className="section-kicker"><i className={ready ? "state-led led-ready" : "state-led"} aria-hidden="true" />ROUTING STATUS <span>·</span> {ready ? "ALL CHECKS PASSED" : "FAIL-CLOSED"}</div><h2 id="status-title">{ready ? "Ready for a verified route" : "Inference forwarding is off"}</h2><p>{ready ? "The integration checks passed. Review model eligibility before connecting Codex Desktop." : "Codex requests are not being forwarded. The compatibility gate must pass before this service can route inference."}</p></div>
+      <div className="gate-result"><span>DISPATCH GATE</span><strong><i className={ready ? "gate-led led-ready" : "gate-led"} aria-hidden="true" />{ready ? "OPEN" : "LOCKED"}</strong></div>
       <button className="banner-action" onClick={onSettings}>View diagnostics <ArrowRight size={15} aria-hidden="true" /></button>
       <span className="banner-index">CR / 01</span>
     </section>
