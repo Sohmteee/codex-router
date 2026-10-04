@@ -1,0 +1,25 @@
+{
+  "name": "codex-router",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.18.3",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=10 <11"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @codex-router/control-panel dev",
+    "service:dev": "pnpm --filter @codex-router/router dev",
+    "desktop:dev": "pnpm --filter @codex-router/desktop tauri dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "check": "pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@types/node": "24.7.2",
+    "typescript": "5.9.2",
+    "vitest": "3.2.4"
+  }
+}
