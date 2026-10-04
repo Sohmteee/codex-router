@@ -15,7 +15,7 @@
   --color-router-good-soft: #eaf7f0;
   --color-router-warn: #a96318;
   --color-router-warn-soft: #fff5e5;
-  --font-sans: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Inter Variable", Inter, system-ui, sans-serif;
   --font-mono: "Cascadia Code", "Cascadia Mono", Consolas, monospace;
 }
 
