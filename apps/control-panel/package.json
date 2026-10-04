@@ -3,13 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": {"dev": "vite --host 127.0.0.1 --port 1420 --strictPort", "build": "tsc -b && vite build", "typecheck": "tsc --noEmit -p tsconfig.app.json"},
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  },
   "dependencies": {
-    "@codex-router/contracts": "workspace:*", "@tauri-apps/api": "2.8.0",
-    "lucide-react": "0.468.0", "react": "19.1.1", "react-dom": "19.1.1"
+    "@codex-router/contracts": "workspace:*",
+    "@hugeicons/core-free-icons": "4.3.5",
+    "@hugeicons/react": "1.1.10",
+    "@tauri-apps/api": "2.8.0",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
   },
   "devDependencies": {
-    "@types/react": "19.1.14", "@types/react-dom": "19.1.9",
-    "@vitejs/plugin-react": "5.0.4", "typescript": "5.9.2", "vite": "7.1.7", "vitest": "3.2.4"
+    "@types/react": "19.1.14",
+    "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "5.0.4",
+    "typescript": "5.9.2",
+    "vite": "7.1.7",
+    "vitest": "3.2.4"
   }
 }

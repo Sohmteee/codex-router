@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
-import Activity from "lucide-react/dist/esm/icons/activity.js";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle.js";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right.js";
-import Check from "lucide-react/dist/esm/icons/check.js";
-import Command from "lucide-react/dist/esm/icons/command.js";
-import Gauge from "lucide-react/dist/esm/icons/gauge.js";
-import Layers3 from "lucide-react/dist/esm/icons/layers-3.js";
-import LockKeyhole from "lucide-react/dist/esm/icons/lock-keyhole.js";
-import Menu from "lucide-react/dist/esm/icons/menu.js";
-import Radio from "lucide-react/dist/esm/icons/radio.js";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw.js";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check.js";
-import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal.js";
-import TerminalSquare from "lucide-react/dist/esm/icons/terminal-square.js";
-import X from "lucide-react/dist/esm/icons/x.js";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import Activity01Icon from "@hugeicons/core-free-icons/Activity01Icon";
+import AlertCircleIcon from "@hugeicons/core-free-icons/AlertCircleIcon";
+import ArrowRight01Icon from "@hugeicons/core-free-icons/ArrowRight01Icon";
+import Cancel01Icon from "@hugeicons/core-free-icons/Cancel01Icon";
+import CommandIcon from "@hugeicons/core-free-icons/CommandIcon";
+import DashboardSquare01Icon from "@hugeicons/core-free-icons/DashboardSquare01Icon";
+import Layers01Icon from "@hugeicons/core-free-icons/Layers01Icon";
+import LockKeyholeIcon from "@hugeicons/core-free-icons/LockKeyholeIcon";
+import Menu01Icon from "@hugeicons/core-free-icons/Menu01Icon";
+import Radio01Icon from "@hugeicons/core-free-icons/Radio01Icon";
+import RefreshIcon from "@hugeicons/core-free-icons/RefreshIcon";
+import Shield01Icon from "@hugeicons/core-free-icons/Shield01Icon";
+import SlidersHorizontalIcon from "@hugeicons/core-free-icons/SlidersHorizontalIcon";
+import SquareTerminalIcon from "@hugeicons/core-free-icons/SquareTerminalIcon";
+import Tick01Icon from "@hugeicons/core-free-icons/Tick01Icon";
 
 type Page = "Overview" | "Models" | "Routing policy" | "Usage" | "Sessions & logs" | "Settings";
 type Health = {
@@ -23,14 +24,18 @@ type Health = {
   lastError: string | null;
 };
 
-const pages: Array<{ name: Page; icon: typeof Activity; group: "WORKSPACE" | "PREFERENCES" }> = [
-  { name: "Overview", icon: Activity, group: "WORKSPACE" },
-  { name: "Models", icon: Layers3, group: "WORKSPACE" },
-  { name: "Routing policy", icon: SlidersHorizontal, group: "WORKSPACE" },
-  { name: "Usage", icon: Gauge, group: "WORKSPACE" },
-  { name: "Sessions & logs", icon: TerminalSquare, group: "WORKSPACE" },
-  { name: "Settings", icon: Radio, group: "PREFERENCES" },
+const pages: Array<{ name: Page; icon: IconSvgElement; group: "WORKSPACE" | "PREFERENCES" }> = [
+  { name: "Overview", icon: Activity01Icon, group: "WORKSPACE" },
+  { name: "Models", icon: Layers01Icon, group: "WORKSPACE" },
+  { name: "Routing policy", icon: SlidersHorizontalIcon, group: "WORKSPACE" },
+  { name: "Usage", icon: DashboardSquare01Icon, group: "WORKSPACE" },
+  { name: "Sessions & logs", icon: SquareTerminalIcon, group: "WORKSPACE" },
+  { name: "Settings", icon: Radio01Icon, group: "PREFERENCES" },
 ];
+
+function UiIcon({ icon, size, strokeWidth = 1.8, className }: { icon: IconSvgElement; size: number; strokeWidth?: number; className?: string }) {
+  return <HugeiconsIcon icon={icon} size={size} strokeWidth={strokeWidth} className={className} aria-hidden="true" />;
+}
 
 const offline: Health = {
   state: "stopped", compatibilityVerified: false, accountState: "disconnected", lastError: "service_unavailable",
@@ -98,9 +103,9 @@ export default function App() {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <aside className={`sidebar${menuOpen ? " sidebar-open" : ""}`}>
         <div className="brand-row">
-          <div className="brand-mark" aria-hidden="true"><Command size={17} strokeWidth={1.8} aria-hidden="true" /></div>
+          <div className="brand-mark" aria-hidden="true"><UiIcon icon={CommandIcon} size={17} /></div>
           <div className="brand-copy"><strong translate="no">codex<span>/</span>router</strong><small>WINDOWS · LOCAL</small></div>
-          <button className="icon-button close-menu" aria-label="Close navigation" aria-controls="primary-navigation" onClick={() => setMenuOpen(false)}><X size={18} aria-hidden="true" /></button>
+          <button className="icon-button close-menu" aria-label="Close navigation" aria-controls="primary-navigation" onClick={() => setMenuOpen(false)}><UiIcon icon={Cancel01Icon} size={18} /></button>
         </div>
 
         <div className="install-card">
@@ -115,8 +120,8 @@ export default function App() {
         </nav>
 
         <div className="sidebar-bottom">
-          <div className="privacy-note"><LockKeyhole size={14} aria-hidden="true" /><span><strong>Local by default</strong><small>Request content stays out of decision logs.</small></span></div>
-          <div className="sidebar-meta"><span className="version-label">v0.1.0 preview</span><button onClick={() => navigate("Settings")}><Radio size={14} aria-hidden="true" />Diagnostics</button></div>
+          <div className="privacy-note"><UiIcon icon={LockKeyholeIcon} size={14} /><span><strong>Local by default</strong><small>Request content stays out of decision logs.</small></span></div>
+          <div className="sidebar-meta"><span className="version-label">v0.1.0 preview</span><button onClick={() => navigate("Settings")}><UiIcon icon={Radio01Icon} size={14} />Diagnostics</button></div>
         </div>
       </aside>
 
@@ -124,7 +129,7 @@ export default function App() {
 
       <main className="main-area" id="main-content" tabIndex={-1}>
         <header className="topbar">
-          <div className="topbar-context"><button className="icon-button menu-button" aria-label="Open navigation" aria-expanded={menuOpen} aria-controls="primary-navigation" onClick={() => setMenuOpen(true)}><Menu size={18} aria-hidden="true" /></button><span>Codex Router</span><span className="path-separator" aria-hidden="true">/</span><strong>{page}</strong></div>
+          <div className="topbar-context"><button className="icon-button menu-button" aria-label="Open navigation" aria-expanded={menuOpen} aria-controls="primary-navigation" onClick={() => setMenuOpen(true)}><UiIcon icon={Menu01Icon} size={18} /></button><span>Codex Router</span><span className="path-separator" aria-hidden="true">/</span><strong>{page}</strong></div>
           <div className="topbar-tools"><span role="status" aria-live="polite" aria-atomic="true" className={`connection-state${ready ? " connection-ready" : serviceUp ? " connection-waiting" : ""}`}><i aria-hidden="true" />{serviceLabel}</span><span className="build-tag">DEV</span></div>
         </header>
 
@@ -158,11 +163,11 @@ function formatTime(value: string) {
 }
 
 function NavGroup({ label, items, page }: {
-  label: string; items: Array<{ name: Page; icon: typeof Activity }>; page: Page;
+  label: string; items: Array<{ name: Page; icon: IconSvgElement }>; page: Page;
 }) {
   return <section className="nav-group"><div className="nav-heading">{label}</div>{items.map(({ name, icon: Icon }) => (
     <a key={name} className={`nav-item${page === name ? " active" : ""}`} href={`#${pageSlug(name)}`} aria-current={page === name ? "page" : undefined}>
-      <Icon size={16} strokeWidth={1.8} aria-hidden="true" /><span>{name}</span>{page === name && <i aria-hidden="true" />}
+      <UiIcon icon={Icon} size={16} strokeWidth={1.8} /><span>{name}</span>{page === name && <i aria-hidden="true" />}
     </a>
   ))}</section>;
 }
@@ -173,13 +178,13 @@ function Overview({ ready, serviceUp, loading, onRefresh, onSettings, onModels, 
   return <section className="overview-page">
     <div className="page-heading">
       <div><div className="eyebrow"><span>01</span> WORKSPACE</div><h1>Overview</h1><p>Local routing status and integration readiness.</p></div>
-      <div className="heading-actions"><button className="button quiet-button" onClick={onSettings}>Diagnostics <ArrowRight size={14} aria-hidden="true" /></button><button className="button secondary-button" disabled={loading} onClick={onRefresh}><RefreshCw size={14} className={loading ? "spin" : ""} aria-hidden="true" />Recheck</button></div>
+      <div className="heading-actions"><button className="button quiet-button" onClick={onSettings}>Diagnostics <UiIcon icon={ArrowRight01Icon} size={14} /></button><button className="button secondary-button" disabled={loading} onClick={onRefresh}><UiIcon icon={RefreshIcon} size={14} className={loading ? "spin" : ""} />Recheck</button></div>
     </div>
 
     <section className={`status-banner${ready ? " status-banner-ready" : ""}`} aria-labelledby="status-title">
       <div className="status-copy"><div className="section-kicker"><i className={ready ? "state-led led-ready" : "state-led"} aria-hidden="true" />ROUTING STATUS <span>·</span> {ready ? "ALL CHECKS PASSED" : "FAIL-CLOSED"}</div><h2 id="status-title">{ready ? "Ready for a verified route" : "Inference forwarding is off"}</h2><p>{ready ? "The integration checks passed. Review model eligibility before connecting Codex Desktop." : "Codex requests are not being forwarded. The compatibility gate must pass before this service can route inference."}</p></div>
       <div className="gate-result"><span>DISPATCH GATE</span><strong><i className={ready ? "gate-led led-ready" : "gate-led"} aria-hidden="true" />{ready ? "OPEN" : "LOCKED"}</strong></div>
-      <button className="banner-action" onClick={onSettings}>View diagnostics <ArrowRight size={15} aria-hidden="true" /></button>
+      <button className="banner-action" onClick={onSettings}>View diagnostics <UiIcon icon={ArrowRight01Icon} size={15} /></button>
       <span className="banner-index">CR / 01</span>
     </section>
 
@@ -193,7 +198,7 @@ function Overview({ ready, serviceUp, loading, onRefresh, onSettings, onModels, 
     <div className="overview-grid">
       <section className="surface activity-surface">
         <div className="surface-heading"><div><div className="section-kicker">ROUTER JOURNAL</div><h2>Recent decisions</h2></div><span className="quiet-count">00</span></div>
-        <div className="empty-journal"><span className="journal-icon" aria-hidden="true"><TerminalSquare size={17} strokeWidth={1.7} /></span><div><strong>No routed requests yet</strong><p>Decisions will appear here after a verified Codex request passes through the local router.</p></div><span className="empty-rule" aria-hidden="true" /></div>
+        <div className="empty-journal"><span className="journal-icon" aria-hidden="true"><UiIcon icon={SquareTerminalIcon} size={17} strokeWidth={1.7} /></span><div><strong>No routed requests yet</strong><p>Decisions will appear here after a verified Codex request passes through the local router.</p></div><span className="empty-rule" aria-hidden="true" /></div>
         <div className="surface-foot"><span><i /> Request bodies are never recorded</span><span>{checkedAt ? "LIVE HEALTH" : "WAITING"}</span></div>
       </section>
 
@@ -205,11 +210,11 @@ function Overview({ ready, serviceUp, loading, onRefresh, onSettings, onModels, 
           <GateStep number="03" title="Inference path" detail="Streaming, cancellation, continuation" state="pending" />
           <GateStep number="04" title="Codex Desktop" detail="Safe model switch at a boundary" state="pending" last />
         </div>
-        <button className="gate-link" onClick={onSettings}>Open integration diagnostics <ArrowRight size={14} aria-hidden="true" /></button>
+        <button className="gate-link" onClick={onSettings}>Open integration diagnostics <UiIcon icon={ArrowRight01Icon} size={14} /></button>
       </section>
     </div>
 
-    <div className="integrity-line"><ShieldCheck size={15} aria-hidden="true" /><span><strong>Authorization stays in the router.</strong> Recommendations cannot enable a model or bypass the final eligibility check.</span><button onClick={onModels}>Model controls <ArrowRight size={13} aria-hidden="true" /></button></div>
+    <div className="integrity-line"><UiIcon icon={Shield01Icon} size={15} /><span><strong>Authorization stays in the router.</strong> Recommendations cannot enable a model or bypass the final eligibility check.</span><button onClick={onModels}>Model controls <UiIcon icon={ArrowRight01Icon} size={13} /></button></div>
   </section>;
 }
 
@@ -218,11 +223,11 @@ function Metric({ label, value, detail, state, last = false }: { label: string; 
 }
 
 function GateStep({ number, title, detail, state, last = false }: { number: string; title: string; detail: string; state: "done" | "current" | "pending"; last?: boolean }) {
-  return <div className={`gate-step${last ? " gate-step-last" : ""}`}><span className={`step-number step-${state}`} aria-hidden={state === "done"}>{state === "done" ? <Check size={12} aria-hidden="true" /> : number}</span><span className="step-copy"><strong>{title}</strong><small>{detail}</small></span><span className={`step-state step-state-${state}`}>{state === "done" ? "PASS" : state === "current" ? "NOW" : "WAITING"}</span></div>;
+  return <div className={`gate-step${last ? " gate-step-last" : ""}`}><span className={`step-number step-${state}`} aria-hidden={state === "done"}>{state === "done" ? <UiIcon icon={Tick01Icon} size={12} /> : number}</span><span className="step-copy"><strong>{title}</strong><small>{detail}</small></span><span className={`step-state step-state-${state}`}>{state === "done" ? "PASS" : state === "current" ? "NOW" : "WAITING"}</span></div>;
 }
 
 function PendingPage({ page, connected, onConnect }: { page: Page; connected: boolean; onConnect: () => void }) {
-  const Icon = pages.find((item) => item.name === page)?.icon ?? Layers3;
+  const Icon = pages.find((item) => item.name === page)?.icon ?? Layers01Icon;
   const descriptions: Record<Page, string> = {
     Overview: "", Models: "Account-visible models, capability evidence, and the models allowed to route.",
     "Routing policy": "Task requirements are evaluated before allowance preferences.",
@@ -232,14 +237,14 @@ function PendingPage({ page, connected, onConnect }: { page: Page; connected: bo
   };
   return <section className="subpage">
     <div className="page-heading"><div><div className="eyebrow"><span>{String(pages.findIndex((item) => item.name === page) + 1).padStart(2, "0")}</span> WORKSPACE</div><h1>{page}</h1><p>{descriptions[page]}</p></div></div>
-    <div className="planned-surface"><div className="planned-icon" aria-hidden="true"><Icon size={19} strokeWidth={1.7} /></div><div className="planned-copy"><div className="section-kicker">INTEGRATION PENDING</div><h2>{connected ? "Waiting for verified model data" : "This view is not connected yet"}</h2><p>{page === "Models" ? "Model records stay empty until account-specific discovery and capability checks are implemented." : "This section will use live router and account data. It will not show placeholder models, quota estimates, or fabricated decisions."}</p><button className="button secondary-button" onClick={onConnect}>Review diagnostics <ArrowRight size={14} aria-hidden="true" /></button></div><div className="planned-index">ROUTER / {String(pages.findIndex((item) => item.name === page) + 1).padStart(2, "0")}</div></div>
-    <div className="pending-footnote"><LockKeyhole size={14} aria-hidden="true" /><span>The compatibility spike is a hard gate. Account state remains disconnected until the real request path is proven.</span></div>
+    <div className="planned-surface"><div className="planned-icon" aria-hidden="true"><UiIcon icon={Icon} size={19} strokeWidth={1.7} /></div><div className="planned-copy"><div className="section-kicker">INTEGRATION PENDING</div><h2>{connected ? "Waiting for verified model data" : "This view is not connected yet"}</h2><p>{page === "Models" ? "Model records stay empty until account-specific discovery and capability checks are implemented." : "This section will use live router and account data. It will not show placeholder models, quota estimates, or fabricated decisions."}</p><button className="button secondary-button" onClick={onConnect}>Review diagnostics <UiIcon icon={ArrowRight01Icon} size={14} /></button></div><div className="planned-index">ROUTER / {String(pages.findIndex((item) => item.name === page) + 1).padStart(2, "0")}</div></div>
+    <div className="pending-footnote"><UiIcon icon={LockKeyholeIcon} size={14} /><span>The compatibility spike is a hard gate. Account state remains disconnected until the real request path is proven.</span></div>
   </section>;
 }
 
 function Settings({ health, serviceUp, loading, onRefresh }: { health: Health; serviceUp: boolean; loading: boolean; onRefresh: () => void }) {
   return <section className="subpage settings-page">
-    <div className="page-heading"><div><div className="eyebrow"><span>06</span> PREFERENCES</div><h1>Settings & diagnostics</h1><p>Local service, account path, and compatibility state.</p></div><button className="button secondary-button" disabled={loading} onClick={onRefresh}><RefreshCw size={14} className={loading ? "spin" : ""} aria-hidden="true" />Recheck</button></div>
+    <div className="page-heading"><div><div className="eyebrow"><span>06</span> PREFERENCES</div><h1>Settings & diagnostics</h1><p>Local service, account path, and compatibility state.</p></div><button className="button secondary-button" disabled={loading} onClick={onRefresh}><UiIcon icon={RefreshIcon} size={14} className={loading ? "spin" : ""} />Recheck</button></div>
 
     <section className="settings-surface">
       <div className="surface-heading"><div><div className="section-kicker">PROCESS</div><h2>Router service</h2></div><StatusTag state={serviceUp ? "waiting" : "offline"} label={serviceUp ? "SETUP REQUIRED" : "OFFLINE"} /></div>
@@ -248,16 +253,16 @@ function Settings({ health, serviceUp, loading, onRefresh }: { health: Health; s
       <SettingRow label="Codex account" value={health.accountState === "connected" ? "Connected" : "Not connected"} />
       <SettingRow label="Data store" value="Local · current Windows user" />
       <SettingRow label="Request content in logs" value="Never" last />
-      {health.lastError && <div className="diagnostic-note"><AlertCircle size={15} aria-hidden="true" /><span>Last health result <code translate="no">{health.lastError}</code>. Start the router service, then recheck.</span></div>}
+      {health.lastError && <div className="diagnostic-note"><UiIcon icon={AlertCircleIcon} size={15} /><span>Last health result <code translate="no">{health.lastError}</code>. Start the router service, then recheck.</span></div>}
     </section>
 
     <section className="settings-surface">
       <div className="surface-heading"><div><div className="section-kicker">ACCOUNT</div><h2>Credentials & discovery</h2></div><StatusTag state="offline" label="NOT VERIFIED" /></div>
-      <div className="account-state"><LockKeyhole size={16} aria-hidden="true" /><div><strong>Sign-in is not enabled</strong><p>Credential storage and account-specific discovery follow the compatibility spike.</p></div></div>
+      <div className="account-state"><UiIcon icon={LockKeyholeIcon} size={16} /><div><strong>Sign-in is not enabled</strong><p>Credential storage and account-specific discovery follow the compatibility spike.</p></div></div>
     </section>
 
     <section className="settings-surface">
-      <div className="surface-heading"><div><div className="section-kicker">RETENTION</div><h2>Privacy</h2></div><span className="privacy-mark"><ShieldCheck size={15} aria-hidden="true" /> LOCAL</span></div>
+      <div className="surface-heading"><div><div className="section-kicker">RETENTION</div><h2>Privacy</h2></div><span className="privacy-mark"><UiIcon icon={Shield01Icon} size={15} /> LOCAL</span></div>
       <SettingRow label="Decision metadata retention" value="30 days" />
       <p className="privacy-detail">Prompts, source code, images, and credentials do not enter the decision log.</p>
     </section>
