@@ -2,21 +2,17 @@ import { useEffect, useState } from "react";
 import Activity from "lucide-react/dist/esm/icons/activity.js";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle.js";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right.js";
-import Bot from "lucide-react/dist/esm/icons/bot.js";
 import Check from "lucide-react/dist/esm/icons/check.js";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down.js";
 import CircleHelp from "lucide-react/dist/esm/icons/circle-help.js";
 import Command from "lucide-react/dist/esm/icons/command.js";
 import Gauge from "lucide-react/dist/esm/icons/gauge.js";
 import Layers3 from "lucide-react/dist/esm/icons/layers-3.js";
-import LoaderCircle from "lucide-react/dist/esm/icons/loader-circle.js";
 import LockKeyhole from "lucide-react/dist/esm/icons/lock-keyhole.js";
 import Menu from "lucide-react/dist/esm/icons/menu.js";
 import Radio from "lucide-react/dist/esm/icons/radio.js";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw.js";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check.js";
 import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal.js";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles.js";
 import TerminalSquare from "lucide-react/dist/esm/icons/terminal-square.js";
 import X from "lucide-react/dist/esm/icons/x.js";
 
@@ -28,13 +24,13 @@ type Health = {
   lastError: string | null;
 };
 
-const pages: Array<{ name: Page; icon: typeof Activity }> = [
-  { name: "Overview", icon: Activity },
-  { name: "Models", icon: Layers3 },
-  { name: "Routing policy", icon: SlidersHorizontal },
-  { name: "Usage", icon: Gauge },
-  { name: "Sessions & logs", icon: TerminalSquare },
-  { name: "Settings", icon: Radio },
+const pages: Array<{ name: Page; icon: typeof Activity; group: "WORKSPACE" | "PREFERENCES" }> = [
+  { name: "Overview", icon: Activity, group: "WORKSPACE" },
+  { name: "Models", icon: Layers3, group: "WORKSPACE" },
+  { name: "Routing policy", icon: SlidersHorizontal, group: "WORKSPACE" },
+  { name: "Usage", icon: Gauge, group: "WORKSPACE" },
+  { name: "Sessions & logs", icon: TerminalSquare, group: "WORKSPACE" },
+  { name: "Settings", icon: Radio, group: "PREFERENCES" },
 ];
 
 const offline: Health = {
@@ -71,148 +67,174 @@ export default function App() {
   const connected = health.accountState === "connected";
   const ready = health.compatibilityVerified && health.state === "ready";
   const serviceUp = health.state === "degraded" || health.state === "ready";
+  const serviceLabel = ready ? "Routing enabled" : serviceUp ? "Setup required" : "Service offline";
+
+  function navigate(nextPage: Page) {
+    setPage(nextPage);
+    setMenuOpen(false);
+  }
 
   return (
-    <div className="shell">
-      <aside className={"sidebar" + (menuOpen ? " sidebar-open" : "")}>
-        <div className="brand">
-          <div className="brand-mark"><Command size={18} /></div>
-          <div><strong>Codex Router</strong><small>LOCAL CONTROL PLANE</small></div>
-          <button className="icon-button close-menu" aria-label="Close menu" onClick={() => setMenuOpen(false)}><X size={18} /></button>
+    <div className="app-shell">
+      <aside className={`sidebar${menuOpen ? " sidebar-open" : ""}`}>
+        <div className="brand-row">
+          <div className="brand-mark" aria-hidden="true"><Command size={17} strokeWidth={1.8} /></div>
+          <div className="brand-copy"><strong>codex<span>/</span>router</strong><small>WINDOWS · LOCAL</small></div>
+          <button className="icon-button close-menu" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X size={18} /></button>
         </div>
-        <button className="workspace" onClick={() => setPage("Settings")}>
-          <span className="workspace-monogram">W</span>
-          <span className="workspace-label"><strong>Windows workspace</strong><small>Personal installation</small></span>
-          <ChevronDown size={15} />
-        </button>
-        <div className="nav-heading">CONTROL</div>
-        <nav aria-label="Main navigation">
-          {pages.slice(0, 5).map(({ name, icon: Icon }) => (
-            <button key={name} className={"nav-item" + (page === name ? " active" : "")} onClick={() => { setPage(name); setMenuOpen(false); }}>
-              <Icon size={17} /><span>{name}</span>
-              {name === "Models" && !connected && <i>—</i>}
-            </button>
-          ))}
+
+        <div className="install-card">
+          <span className="install-monogram">CR</span>
+          <span className="install-copy"><strong>Personal install</strong><small>Windows workspace</small></span>
+          <span className="install-state" title={serviceLabel}><i className={ready ? "is-ready" : serviceUp ? "is-waiting" : ""} /></span>
+        </div>
+
+        <nav className="side-nav" aria-label="Main navigation">
+          <NavGroup label="WORKSPACE" items={pages.filter((item) => item.group === "WORKSPACE")} page={page} onNavigate={navigate} />
+          <NavGroup label="PREFERENCES" items={pages.filter((item) => item.group === "PREFERENCES")} page={page} onNavigate={navigate} />
         </nav>
-        <div className="nav-heading prefs-heading">PREFERENCES</div>
-        <button className={"nav-item" + (page === "Settings" ? " active" : "")} onClick={() => setPage("Settings")}><Radio size={17} /><span>Settings</span></button>
-        <div className="sidebar-spacer" />
-        <div className="local-note">
-          <span className="local-note-icon"><LockKeyhole size={15} /></span>
-          <div><strong>Your router stays local</strong><p>Prompts stay out of decision logs. Jev sees only a short routing brief.</p></div>
-        </div>
+
         <div className="sidebar-bottom">
-          <span className="version"><i />V0.1.0 · PREVIEW</span>
-          <button onClick={() => setPage("Settings")}><CircleHelp size={14} />Help</button>
+          <div className="privacy-note"><LockKeyhole size={14} /><span><strong>Local by default</strong><small>Request content stays out of decision logs.</small></span></div>
+          <div className="sidebar-meta"><span className="version-label">v0.1.0 preview</span><button onClick={() => navigate("Settings")}><CircleHelp size={14} />Help</button></div>
         </div>
       </aside>
-      {menuOpen && <button className="scrim" aria-label="Close menu" onClick={() => setMenuOpen(false)} />}
-      <main className="main">
+
+      {menuOpen && <button className="scrim" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
+
+      <main className="main-area">
         <header className="topbar">
-          <div className="crumb"><button aria-label="Open navigation" onClick={() => setMenuOpen(true)}><Menu size={19} /></button><span>Router</span><b>/</b><strong>{page}</strong></div>
-          <div className="topbar-right"><span className="service-state"><i className={serviceUp ? "amber-dot" : ""} />{ready ? "Routing ready" : serviceUp ? "Setup required" : "Service offline"}</span><button className="avatar" onClick={() => setPage("Settings")} aria-label="Settings">S</button></div>
+          <div className="topbar-context"><button className="icon-button menu-button" aria-label="Open navigation" onClick={() => setMenuOpen(true)}><Menu size={18} /></button><span>Codex Router</span><span className="path-separator">/</span><strong>{page}</strong></div>
+          <div className="topbar-tools"><span className={`connection-state${ready ? " connection-ready" : serviceUp ? " connection-waiting" : ""}`}><i />{serviceLabel}</span><span className="build-tag">DEV</span></div>
         </header>
-        <div className="content">
+
+        <div className="page-content">
           {page === "Overview" ? (
-            <Overview ready={ready} serviceUp={serviceUp} loading={loading} onRefresh={() => void refresh()} onSetup={() => setPage("Settings")} onModels={() => setPage("Models")} />
+            <Overview ready={ready} serviceUp={serviceUp} loading={loading} onRefresh={() => void refresh()} onSettings={() => navigate("Settings")} onModels={() => navigate("Models")} checkedAt={checkedAt} />
           ) : page === "Settings" ? (
             <Settings health={health} serviceUp={serviceUp} loading={loading} onRefresh={() => void refresh()} />
           ) : (
-            <PendingPage page={page} connected={connected} onConnect={() => setPage("Settings")} />
+            <PendingPage page={page} connected={connected} onConnect={() => navigate("Settings")} />
           )}
         </div>
-        <footer className="footer"><span>Codex Router <b>·</b> Runs on this device</span><span>{checkedAt ? "Checked " + new Date(checkedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Checking local service"}</span></footer>
+
+        <footer className="app-footer"><span><span className="footer-mark">CR</span> Local routing control plane</span><span>{checkedAt ? `Health checked ${new Date(checkedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Checking service health"}</span></footer>
       </main>
     </div>
   );
 }
 
-function Overview({ ready, serviceUp, loading, onRefresh, onSetup, onModels }: {
-  ready: boolean; serviceUp: boolean; loading: boolean; onRefresh: () => void; onSetup: () => void; onModels: () => void;
+function NavGroup({ label, items, page, onNavigate }: {
+  label: string; items: Array<{ name: Page; icon: typeof Activity }>; page: Page; onNavigate: (page: Page) => void;
 }) {
-  return (
-    <section className="page">
-      <div className="page-heading">
-        <div><div className="eyebrow"><i /> ROUTER OVERVIEW</div><h1>Good morning, Sohmtee <span>✦</span></h1><p>Here’s the status of your local model routing setup.</p></div>
-        <button className="button secondary" disabled={loading} onClick={onRefresh}><RefreshCw size={15} className={loading ? "spin" : ""} />Refresh status</button>
-      </div>
-      <section className={"hero" + (ready ? " hero-ready" : "")}>
-        <div className="hero-graphic" aria-hidden="true"><div className="halo h-one" /><div className="halo h-two" /><div className="hero-glow" /><div className="hero-core"><Bot size={26} /></div><i className="node n-one"><Sparkles size={11} /></i><i className="node n-two"><Radio size={11} /></i></div>
-        <div className="hero-copy"><div className="hero-status"><i />{ready ? "INTEGRATION READY" : "SETUP IN PROGRESS"}</div>
-          <h2>{ready ? "Your router is ready to connect" : "Let’s get your router connected"}</h2>
-          <p>{ready ? "Review your enabled model choices before turning on automatic routing." : "Connect your account and verify Desktop compatibility before enabling inference traffic."}</p>
-          <div className="hero-actions"><button className="button hero-button" onClick={onSetup}>{ready ? "Review setup" : "Continue setup"}<ArrowRight size={14} /></button><button className="text-button" onClick={onModels}>View all models</button></div>
-        </div>
-        <span className="hero-index">01 / 04</span>
+  return <section className="nav-group"><h2>{label}</h2>{items.map(({ name, icon: Icon }) => (
+    <button key={name} className={`nav-item${page === name ? " active" : ""}`} aria-current={page === name ? "page" : undefined} onClick={() => onNavigate(name)}>
+      <Icon size={16} strokeWidth={1.8} /><span>{name}</span>{page === name && <i aria-hidden="true" />}
+    </button>
+  ))}</section>;
+}
+
+function Overview({ ready, serviceUp, loading, onRefresh, onSettings, onModels, checkedAt }: {
+  ready: boolean; serviceUp: boolean; loading: boolean; onRefresh: () => void; onSettings: () => void; onModels: () => void; checkedAt: string | null;
+}) {
+  return <section className="overview-page">
+    <div className="page-heading">
+      <div><div className="eyebrow"><span>01</span> WORKSPACE</div><h1>Overview</h1><p>Local routing status and integration readiness.</p></div>
+      <div className="heading-actions"><button className="button quiet-button" onClick={onSettings}>Diagnostics <ArrowRight size={14} /></button><button className="button secondary-button" disabled={loading} onClick={onRefresh}><RefreshCw size={14} className={loading ? "spin" : ""} />Recheck</button></div>
+    </div>
+
+    <section className={`status-banner${ready ? " status-banner-ready" : ""}`} aria-labelledby="status-title">
+      <div className="status-signal"><span /><span /><span /><i>{ready ? <Check size={19} /> : <Radio size={19} />}</i></div>
+      <div className="status-copy"><div className="section-kicker">ROUTING STATUS <span>·</span> {ready ? "ALL CHECKS PASSED" : "FAIL-CLOSED"}</div><h2 id="status-title">{ready ? "Ready for a verified route" : "Inference forwarding is off"}</h2><p>{ready ? "The integration checks passed. Review model eligibility before connecting Codex Desktop." : "Codex requests are not being forwarded. The compatibility gate must pass before this service can route inference."}</p></div>
+      <button className="banner-action" onClick={onSettings}>View diagnostics <ArrowRight size={15} /></button>
+      <span className="banner-index">CR / 01</span>
+    </section>
+
+    <div className="metric-strip" aria-label="Current routing metrics">
+      <Metric label="ROUTER SERVICE" value={serviceUp ? "Responding" : "Offline"} detail={serviceUp ? "Local control API" : "127.0.0.1 · :4187"} state={serviceUp ? "positive" : "warning"} />
+      <Metric label="ELIGIBLE MODELS" value="—" detail="Account catalog not verified" state="neutral" />
+      <Metric label="USAGE SIGNAL" value="—" detail="No trusted quota snapshot" state="neutral" />
+      <Metric label="ROUTES TODAY" value="0" detail="No requests recorded" state="neutral" last />
+    </div>
+
+    <div className="overview-grid">
+      <section className="surface activity-surface">
+        <div className="surface-heading"><div><div className="section-kicker">ROUTER JOURNAL</div><h2>Recent decisions</h2></div><span className="quiet-count">00</span></div>
+        <div className="empty-journal"><span className="journal-icon"><TerminalSquare size={17} strokeWidth={1.7} /></span><div><strong>No routed requests yet</strong><p>Decisions will appear here after a verified Codex request passes through the local router.</p></div><span className="empty-rule" /></div>
+        <div className="surface-foot"><span><i /> Request bodies are never recorded</span><span>{checkedAt ? "LIVE HEALTH" : "WAITING"}</span></div>
       </section>
 
-      <div className="section-head"><div><h3>At a glance</h3><p>A live view of your local routing state</p></div><span className="live-pill"><i />LIVE STATUS</span></div>
-      <div className="stats">
-        <Stat icon={Radio} tone={serviceUp ? "green" : "amber"} label="Router service" value={serviceUp ? "Running" : "Offline"} meta={serviceUp ? "Listening on this device" : "Start the local service"} note={serviceUp ? "Healthy" : "Needs attention"} />
-        <Stat icon={Layers3} tone="blue" label="Eligible models" value="—" meta="Connect account to discover" note="No account" />
-        <Stat icon={Gauge} tone="violet" label="Usage pressure" value="—" meta="Actual account windows only" note="Unavailable" />
-        <Stat icon={Activity} tone="orange" label="Route decisions" value="0" meta="Decisions since setup" note="Getting started" />
-      </div>
+      <section className="surface gate-surface">
+        <div className="surface-heading"><div><div className="section-kicker">RELEASE GATE</div><h2>Compatibility checks</h2></div><span className="gate-count">{ready ? "04" : serviceUp ? "01" : "00"}<i> / 04</i></span></div>
+        <div className="gate-list">
+          <GateStep number="01" title="Local service" detail={serviceUp ? "Health endpoint responds" : "Waiting for router process"} state={serviceUp ? "done" : "current"} />
+          <GateStep number="02" title="Account and usage" detail="Same-account catalog and quota" state="pending" />
+          <GateStep number="03" title="Inference path" detail="Streaming, cancellation, continuation" state="pending" />
+          <GateStep number="04" title="Codex Desktop" detail="Safe model switch at a boundary" state="pending" last />
+        </div>
+        <button className="gate-link" onClick={onSettings}>Open integration diagnostics <ArrowRight size={14} /></button>
+      </section>
+    </div>
 
-      <div className="panels">
-        <section className="panel activity">
-          <div className="panel-heading"><div><h3>Recent activity</h3><p>Your latest routing decisions will appear here.</p></div><button className="muted-action" disabled>View history <ArrowRight size={13} /></button></div>
-          <div className="empty-activity"><span><Activity size={19} /></span><strong>Nothing routed yet</strong><p>Activity appears when a verified Codex request passes through the router.</p><button onClick={onSetup}>Check setup <ArrowRight size={13} /></button></div>
-        </section>
-        <section className="panel checklist">
-          <div className="panel-heading"><div><h3>Setup checklist</h3><p>Four checks before routing can begin.</p></div><div className="progress"><strong>{serviceUp ? "1" : "0"}</strong><span>/ 4 complete</span></div></div>
-          <CheckRow icon={ShieldCheck} title="Local service" detail={serviceUp ? "Service is responding" : "Waiting for the router service"} state={serviceUp ? "done" : "current"} />
-          <CheckRow icon={Bot} title="Codex account" detail="Connect the signed-in account" state="pending" />
-          <CheckRow icon={Layers3} title="Model choices" detail="Verify and enable models" state="pending" />
-          <CheckRow icon={Check} title="Desktop compatibility" detail="Streaming and tool continuation" state="pending" last />
-        </section>
-      </div>
-      <div className="trust"><span><ShieldCheck size={17} /></span><div><strong>Your safeguards stay in place</strong><p>Model choices are checked before dispatch. Codex keeps control of tools and approvals.</p></div><button onClick={onSetup}>Security details <ArrowRight size={13} /></button></div>
-    </section>
-  );
+    <div className="integrity-line"><ShieldCheck size={15} /><span><strong>Authorization stays in the router.</strong> Recommendations cannot enable a model or bypass the final eligibility check.</span><button onClick={onModels}>Model controls <ArrowRight size={13} /></button></div>
+  </section>;
 }
 
-function Stat({ icon: Icon, tone, label, value, meta, note }: {
-  icon: typeof Activity; tone: string; label: string; value: string; meta: string; note: string;
-}) {
-  return <article className="stat"><div className="stat-top"><span className={"stat-icon " + tone}><Icon size={16} /></span><span className={"stat-note " + tone}>{note}</span></div><small>{label}</small><strong>{value}</strong><p>{meta}</p></article>;
+function Metric({ label, value, detail, state, last = false }: { label: string; value: string; detail: string; state: "positive" | "warning" | "neutral"; last?: boolean }) {
+  return <article className={`metric${last ? " metric-last" : ""}`}><div className="metric-label"><i className={`metric-indicator ${state}`} />{label}</div><strong className={state === "neutral" ? "is-muted" : ""}>{value}</strong><span>{detail}</span></article>;
 }
 
-function CheckRow({ icon: Icon, title, detail, state, last = false }: {
-  icon: typeof Activity; title: string; detail: string; state: "done" | "current" | "pending"; last?: boolean;
-}) {
-  return <div className={"check-row" + (last ? " last" : "")}><i className={"check-icon " + state}>{state === "done" ? <Check size={13} /> : state === "current" ? <LoaderCircle size={13} /> : <Icon size={13} />}</i><div><strong>{title}</strong><small>{detail}</small></div><span className={state}>{state === "done" ? "DONE" : state === "current" ? "IN PROGRESS" : "PENDING"}</span></div>;
+function GateStep({ number, title, detail, state, last = false }: { number: string; title: string; detail: string; state: "done" | "current" | "pending"; last?: boolean }) {
+  return <div className={`gate-step${last ? " gate-step-last" : ""}`}><span className={`step-number step-${state}`}>{state === "done" ? <Check size={12} /> : number}</span><span className="step-copy"><strong>{title}</strong><small>{detail}</small></span><span className={`step-state step-state-${state}`}>{state === "done" ? "PASS" : state === "current" ? "NOW" : "WAITING"}</span></div>;
 }
 
 function PendingPage({ page, connected, onConnect }: { page: Page; connected: boolean; onConnect: () => void }) {
   const Icon = pages.find((item) => item.name === page)?.icon ?? Layers3;
   const descriptions: Record<Page, string> = {
-    Overview: "", Models: "See account-visible models, verify their capabilities, and choose which ones Codex Router may use.",
-    "Routing policy": "Set task preferences and allowance pressure. Every route still passes the same final eligibility check.",
-    Usage: "Read actual account usage windows with their refresh times. Missing data remains unavailable.",
-    "Sessions & logs": "Review routing decisions and errors without storing request bodies or source text.",
+    Overview: "", Models: "Account-visible models, capability evidence, and the models allowed to route.",
+    "Routing policy": "Task requirements are evaluated before allowance preferences.",
+    Usage: "Account usage windows with source timestamps and freshness state.",
+    "Sessions & logs": "Redacted route decisions, session state, and operational errors.",
     Settings: "",
   };
-  return <section className="page subpage"><div className="page-heading"><div><div className="eyebrow"><i />{page.toUpperCase()}</div><h1>{page}</h1><p>{descriptions[page]}</p></div></div><div className="pending-card"><span className="pending-icon"><Icon size={22} /></span><div><small>{connected ? "WAITING FOR REGISTRY" : "WAITING FOR INTEGRATION"}</small><h2>Connect your Codex account to continue</h2><p>Live account discovery and Desktop compatibility must be verified first. No placeholder model or usage data is shown here.</p><button className="button primary" onClick={onConnect}>Open account setup <ArrowRight size={14} /></button></div></div><div className="info-note"><ShieldCheck size={16} /> This page uses the same policy gate as the inference router.</div></section>;
-}
-
-function Settings({ health, serviceUp, loading, onRefresh }: {
-  health: Health; serviceUp: boolean; loading: boolean; onRefresh: () => void;
-}) {
-  return <section className="page subpage"><div className="page-heading"><div><div className="eyebrow"><i /> PREFERENCES</div><h1>Settings & diagnostics</h1><p>Check local health and integration status.</p></div><button className="button secondary" disabled={loading} onClick={onRefresh}><RefreshCw size={14} className={loading ? "spin" : ""} />Refresh</button></div>
-    <section className="settings-card"><div className="settings-heading"><span className="stat-icon blue"><Radio size={16} /></span><div><strong>Local router service</strong><small>Runs on this Windows device</small></div><span className={"badge " + (serviceUp ? "amber-badge" : "red-badge")}><i />{serviceUp ? "SETUP REQUIRED" : "OFFLINE"}</span></div>
-      <SettingRow label="Control API" value={serviceUp ? "127.0.0.1 · port 4187" : "Not responding"} />
-      <SettingRow label="Inference forwarding" value={health.compatibilityVerified ? "Enabled" : "Disabled until compatibility passes"} />
-      <SettingRow label="Codex account" value={health.accountState === "connected" ? "Connected" : "Not connected"} />
-      <SettingRow label="User data" value="Current user · local SQLite" />
-      <SettingRow label="Credentials in logs" value="Never" last />
-      {health.lastError && <div className="gate-note"><AlertCircle size={15} /><span>Integration gate: <code>{health.lastError}</code></span></div>}
-    </section>
-    <section className="settings-card"><div className="settings-heading"><span className="stat-icon violet"><LockKeyhole size={16} /></span><div><strong>Account & credentials</strong><small>Windows protected storage</small></div></div><div className="account-pending"><LockKeyhole size={17} /><div><strong>Sign-in is not enabled yet</strong><p>The account path must pass catalog, usage, inference, and Desktop continuation checks first.</p></div><span className="badge muted-badge">NOT VERIFIED</span></div></section>
-    <section className="settings-card"><div className="settings-heading"><span className="stat-icon orange"><Activity size={16} /></span><div><strong>Privacy & retention</strong><small>Redacted diagnostics are enabled</small></div></div><div className="setting-row no-border"><span>Decision metadata retention</span><strong>30 days</strong></div><p className="privacy-footnote">No prompts, source code, images, or credentials enter the decision log.</p></section>
+  return <section className="subpage">
+    <div className="page-heading"><div><div className="eyebrow"><span>{String(pages.findIndex((item) => item.name === page) + 1).padStart(2, "0")}</span> WORKSPACE</div><h1>{page}</h1><p>{descriptions[page]}</p></div></div>
+    <div className="planned-surface"><div className="planned-icon"><Icon size={19} strokeWidth={1.7} /></div><div className="planned-copy"><div className="section-kicker">INTEGRATION PENDING</div><h2>{connected ? "Waiting for verified model data" : "This view is not connected yet"}</h2><p>{page === "Models" ? "Model records stay empty until account-specific discovery and capability checks are implemented." : "This section will use live router and account data. It will not show placeholder models, quota estimates, or fabricated decisions."}</p><button className="button secondary-button" onClick={onConnect}>Review diagnostics <ArrowRight size={14} /></button></div><div className="planned-index">ROUTER / {String(pages.findIndex((item) => item.name === page) + 1).padStart(2, "0")}</div></div>
+    <div className="pending-footnote"><LockKeyhole size={14} /><span>The compatibility spike is a hard gate. Account state remains disconnected until the real request path is proven.</span></div>
   </section>;
 }
 
+function Settings({ health, serviceUp, loading, onRefresh }: { health: Health; serviceUp: boolean; loading: boolean; onRefresh: () => void }) {
+  return <section className="subpage settings-page">
+    <div className="page-heading"><div><div className="eyebrow"><span>06</span> PREFERENCES</div><h1>Settings & diagnostics</h1><p>Local service, account path, and compatibility state.</p></div><button className="button secondary-button" disabled={loading} onClick={onRefresh}><RefreshCw size={14} className={loading ? "spin" : ""} />Recheck</button></div>
+
+    <section className="settings-surface">
+      <div className="surface-heading"><div><div className="section-kicker">PROCESS</div><h2>Router service</h2></div><StatusTag state={serviceUp ? "waiting" : "offline"} label={serviceUp ? "SETUP REQUIRED" : "OFFLINE"} /></div>
+      <SettingRow label="Control API" value={serviceUp ? "127.0.0.1 · port 4187" : "No response · port 4187"} />
+      <SettingRow label="Inference forwarding" value={health.compatibilityVerified ? "Enabled" : "Disabled until compatibility passes"} />
+      <SettingRow label="Codex account" value={health.accountState === "connected" ? "Connected" : "Not connected"} />
+      <SettingRow label="Data store" value="Local · current Windows user" />
+      <SettingRow label="Request content in logs" value="Never" last />
+      {health.lastError && <div className="diagnostic-note"><AlertCircle size={15} /><span>Last health result <code>{health.lastError}</code></span></div>}
+    </section>
+
+    <section className="settings-surface">
+      <div className="surface-heading"><div><div className="section-kicker">ACCOUNT</div><h2>Credentials & discovery</h2></div><StatusTag state="offline" label="NOT VERIFIED" /></div>
+      <div className="account-state"><LockKeyhole size={16} /><div><strong>Sign-in is not enabled</strong><p>Credential storage and account-specific discovery follow the compatibility spike.</p></div></div>
+    </section>
+
+    <section className="settings-surface">
+      <div className="surface-heading"><div><div className="section-kicker">RETENTION</div><h2>Privacy</h2></div><span className="privacy-mark"><ShieldCheck size={15} /> LOCAL</span></div>
+      <SettingRow label="Decision metadata retention" value="30 days" />
+      <p className="privacy-detail">Prompts, source code, images, and credentials do not enter the decision log.</p>
+    </section>
+  </section>;
+}
+
+function StatusTag({ state, label }: { state: "waiting" | "offline"; label: string }) {
+  return <span className={`status-tag status-tag-${state}`}><i />{label}</span>;
+}
+
 function SettingRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
-  return <div className={"setting-row" + (last ? " no-border" : "")}><span>{label}</span><strong>{value}</strong></div>;
+  return <div className={`setting-row${last ? " setting-row-last" : ""}`}><span>{label}</span><strong>{value}</strong></div>;
 }
