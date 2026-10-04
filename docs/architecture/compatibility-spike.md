@@ -15,6 +15,16 @@ The probe did not issue inference, alter Codex configuration, or save account id
 
 The generated protocol types exposed `model/list`, `account/rateLimits/read`, and `account/usage/read`. These are version-specific app-server methods, so the baseline version above is part of the test record.
 
+## Sanitized probe implementation and current run (2026-10-04)
+
+`pnpm compatibility:probe` starts the installed `codex app-server`, negotiates its current stdio protocol, and performs read-only account, catalog, rate-limit, and usage reads. It prints a redacted JSON summary and writes the same summary to `.cache/compatibility/latest.json`. It never emits model IDs, account identifiers, email addresses, raw quota or usage values, request text, credentials, or raw app-server error messages. The existing Desktop version can be supplied as `CODEX_ROUTER_DESKTOP_VERSION` when it cannot be detected from the Windows uninstall registry.
+
+The live probe in the current Codex execution environment reported CLI and app-server version `0.159.0-alpha.12.1` and seven catalog entries. Its CLI app-server had no signed-in ChatGPT account; `account/rateLimits/read` and `account/usage/read` returned the documented authentication-required condition, and no Desktop installation version was discoverable. This probe context therefore cannot stand in for the user's signed-in Desktop profile. No real inference was issued and no Codex user configuration was changed.
+
+The proxy now has a development-only forwarding mode. Normal startup still returns `503` for Responses requests and reports compatibility as unverified. Test mode additionally requires the installation-local router token and Codex bearer authorization, forwards only the Responses and model-list paths to the fixed HTTPS OpenAI API origin, and does not forward the router token. The mode is rejected under `NODE_ENV=production`. Responses are streamed with backpressure; disconnects abort upstream work, and a stream that fails after headers have started is closed without retry.
+
+The current run remains **partial / blocked on account access**. Health must remain degraded, and Desktop traffic must not be routed based on this sandboxed CLI probe.
+
 ## Required evidence
 
 1. Account/catalog identity uses the same signed-in user/workspace for discovery and inference.

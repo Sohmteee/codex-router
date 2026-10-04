@@ -7,12 +7,15 @@ const EnvironmentSchema = z.object({
   CODEX_ROUTER_DATA_DIR: z.string().min(1).optional(),
   CODEX_ROUTER_LOCAL_TOKEN: z.string().min(32).optional(),
   CODEX_ROUTER_CODEX_BIN: z.string().min(1).default("codex"),
-  CODEX_ROUTER_COMPATIBILITY_PASSED: z.enum(["true", "false"]).default("false"),
+  CODEX_ROUTER_COMPATIBILITY_TEST_MODE: z.enum(["true", "false"]).default("false"),
 });
 
 export type RouterConfig = z.infer<typeof EnvironmentSchema> & { localToken: string };
 
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env): RouterConfig {
   const parsed = EnvironmentSchema.parse(environment);
+  if (environment["NODE_ENV"] === "production" && parsed.CODEX_ROUTER_COMPATIBILITY_TEST_MODE === "true") {
+    throw new Error("Compatibility test mode is unavailable in production.");
+  }
   return { ...parsed, localToken: parsed.CODEX_ROUTER_LOCAL_TOKEN ?? randomBytes(32).toString("base64url") };
 }

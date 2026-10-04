@@ -3,8 +3,9 @@ import cors from "@fastify/cors";
 import { RouterDatabase } from "./storage/database.js";
 import type { RouterConfig } from "./config.js";
 import { timingSafeEqual } from "node:crypto";
+import { forwardCompatibilityRequest } from "./compatibility/proxy.js";
 
-export function createApi(config: RouterConfig, database: RouterDatabase) {
+export function createApi(config: RouterConfig, database: RouterDatabase, upstreamFetch: typeof fetch = fetch) {
   const app = Fastify({
     logger: false,
     bodyLimit: 64 * 1024 * 1024,
@@ -13,10 +14,12 @@ export function createApi(config: RouterConfig, database: RouterDatabase) {
     genReqId: () => crypto.randomUUID(),
   });
 
+  app.addContentTypeParser("application/json", { parseAs: "buffer" }, (_request, body, done) => done(null, body));
+
   void app.register(cors, {
     origin: ["http://127.0.0.1:1420", "http://localhost:1420", "http://tauri.localhost", "https://tauri.localhost"],
     methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["content-type", "x-codex-router-token"],
+    allowedHeaders: ["authorization", "chatgpt-account-id", "content-type", "openai-beta", "openai-organization", "openai-project", "originator", "x-client-request-id", "x-codex-router-token"],
     credentials: false,
   });
 
@@ -24,9 +27,9 @@ export function createApi(config: RouterConfig, database: RouterDatabase) {
     state: "degraded",
     service: "codex-router",
     version: "0.1.0",
-    compatibilityVerified: config.CODEX_ROUTER_COMPATIBILITY_PASSED === "true",
+    compatibilityVerified: false,
     accountState: "disconnected",
-    lastError: config.CODEX_ROUTER_COMPATIBILITY_PASSED === "true" ? null : "compatibility_spike_not_passed",
+    lastError: "compatibility_spike_not_passed",
   }));
 
   app.get("/control/v1/policy", async () => database.getPolicy());
@@ -47,17 +50,12 @@ export function createApi(config: RouterConfig, database: RouterDatabase) {
     errorCode: "account_not_connected",
   }));
 
-  app.post("/v1/responses", async (_request, reply) => {
-    return reply.code(503).send({
-      error: {
-        type: "server_error",
-        code: "compatibility_spike_not_passed",
-        message: "Inference routing is disabled until account, Desktop, streaming, and continuation checks pass.",
-      },
-    });
-  });
+  app.post("/v1/responses", async (request, reply) => forwardCompatibilityRequest(request, reply, config, upstreamFetch));
 
   app.get("/v1/models", async (request, reply) => {
+    if (config.CODEX_ROUTER_COMPATIBILITY_TEST_MODE === "true") {
+      return forwardCompatibilityRequest(request, reply, config, upstreamFetch);
+    }
     if (!authorized(request.headers["x-codex-router-token"], config.localToken)) {
       return reply.code(401).send({ error: "unauthorized" });
     }
